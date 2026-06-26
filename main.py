@@ -1,6 +1,7 @@
 from src.utils import create_spark_session
 from src.ingestion import load_movies, load_ratings, load_tags, load_links, validate_dataframe
 from src.transform import clean_movies, clean_ratings, clean_tags, clean_links, write_silver
+from src.analysis import top_rated_movies, write_gold
 
 
 RAW_MOVIELENS_PATH = "data/raw/ml-latest-small"
@@ -34,6 +35,14 @@ def main():
     write_silver(ratings_clean, f"{SILVER_PATH}/ratings", partition_by="rating_year")
     write_silver(tags_clean, f"{SILVER_PATH}/tags", partition_by="tag_year")
     write_silver(links_clean, f"{SILVER_PATH}/links")
+
+    # Gold - Analysis 1
+    top_movies = top_rated_movies(ratings_clean, min_votes=50)
+
+    print("\n===== TOP RATED MOVIES =====")
+    top_movies.show(10, truncate=False)
+
+    write_gold(top_movies, "data/gold/top_rated_movies")
 
     spark.stop()
 
