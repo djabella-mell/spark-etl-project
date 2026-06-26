@@ -2,6 +2,8 @@ from src.utils import create_spark_session
 from src.ingestion import load_movies, load_ratings, load_tags, load_links, validate_dataframe
 from src.transform import clean_movies, clean_ratings, clean_tags, clean_links, write_silver
 from src.analysis import top_rated_movies, top_rated_movies_with_titles, top_movies_by_genre, write_gold
+from src.optimization import broadcast_movies
+
 
 RAW_MOVIELENS_PATH = "data/raw/ml-latest-small"
 SILVER_PATH = "data/silver"
@@ -25,6 +27,8 @@ def main():
     tags_clean = clean_tags(tags_df)
     links_clean = clean_links(links_df)
 
+    movies_broadcast = broadcast_movies(movies_clean)
+
     validate_dataframe(movies_clean, "movies_silver")
     validate_dataframe(ratings_clean, "ratings_silver")
     validate_dataframe(tags_clean, "tags_silver")
@@ -35,7 +39,7 @@ def main():
     write_silver(tags_clean, f"{SILVER_PATH}/tags", partition_by="tag_year")
     write_silver(links_clean, f"{SILVER_PATH}/links")
 
-    # Gold - Analysis 1
+    # Gold - Analysis 1: aggregation
     top_movies = top_rated_movies(ratings_clean, min_votes=50)
 
     print("\n===== TOP RATED MOVIES =====")
@@ -43,10 +47,10 @@ def main():
 
     write_gold(top_movies, "data/gold/top_rated_movies")
 
-    # Gold - Analysis 2
+    # Gold - Analysis 2: join
     top_movies_with_titles = top_rated_movies_with_titles(
         ratings_clean,
-        movies_clean,
+        movies_broadcast,
         min_votes=50
     )
 
@@ -54,10 +58,11 @@ def main():
     top_movies_with_titles.show(10, truncate=False)
 
     write_gold(top_movies_with_titles, "data/gold/top_rated_movies_with_titles")
-    # Gold - Analysis 3
+
+    # Gold - Analysis 3: window function
     top_by_genre = top_movies_by_genre(
         ratings_clean,
-        movies_clean,
+        movies_broadcast,
         min_votes=20,
         top_n=3
     )
