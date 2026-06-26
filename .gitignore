@@ -32,3 +32,6 @@ data/gold/
 # OS
 .DS_Store
 Thumbs.db
+
+# Raw downloaded archives
+data/raw/*.zip
