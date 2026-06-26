@@ -1,7 +1,7 @@
 from src.utils import create_spark_session
 from src.ingestion import load_movies, load_ratings, load_tags, load_links, validate_dataframe
 from src.transform import clean_movies, clean_ratings, clean_tags, clean_links, write_silver
-from src.analysis import top_rated_movies, write_gold
+from src.analysis import top_rated_movies, top_rated_movies_with_titles, write_gold
 
 
 RAW_MOVIELENS_PATH = "data/raw/ml-latest-small"
@@ -43,6 +43,18 @@ def main():
     top_movies.show(10, truncate=False)
 
     write_gold(top_movies, "data/gold/top_rated_movies")
+
+    # Gold - Analysis 2
+    top_movies_with_titles = top_rated_movies_with_titles(
+        ratings_clean,
+        movies_clean,
+        min_votes=50
+    )
+
+    print("\n===== TOP RATED MOVIES WITH TITLES =====")
+    top_movies_with_titles.show(10, truncate=False)
+
+    write_gold(top_movies_with_titles, "data/gold/top_rated_movies_with_titles")
 
     spark.stop()
 

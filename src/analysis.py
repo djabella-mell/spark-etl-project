@@ -17,7 +17,23 @@ def top_rated_movies(ratings_df: DataFrame, min_votes: int = 50) -> DataFrame:
         .filter(F.col("vote_count") >= min_votes)
         .orderBy(F.desc("avg_rating"), F.desc("vote_count"))
     )
+def top_rated_movies_with_titles(
+    ratings_df: DataFrame,
+    movies_df: DataFrame,
+    min_votes: int = 50
+) -> DataFrame:
+    """
+    Return the top rated movies with their titles using a join
+    between ratings and movies.
+    """
+    movie_stats = top_rated_movies(ratings_df, min_votes)
 
+    return (
+        movie_stats
+        .join(movies_df, on="movieId", how="inner")
+        .select("movieId", "title", "genres", "vote_count", "avg_rating")
+        .orderBy(F.desc("avg_rating"), F.desc("vote_count"))
+    )
 
 def write_gold(df: DataFrame, path: str) -> None:
     """
