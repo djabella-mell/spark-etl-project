@@ -56,3 +56,13 @@ def load_tags(spark: SparkSession, base_path: str) -> DataFrame:
 
 def load_links(spark: SparkSession, base_path: str) -> DataFrame:
     return read_csv_with_schema(spark, f"{base_path}/links.csv", LINKS_SCHEMA)
+
+def validate_dataframe(df: DataFrame, name: str) -> None:
+    """
+    Display basic validation information for a DataFrame.
+    """
+    print(f"\n===== {name.upper()} =====")
+    df.printSchema()
+    df.show(5, truncate=False)
+    print(f"Row count: {df.count()}")
+    df.describe().show(truncate=False)
