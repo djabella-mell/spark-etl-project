@@ -9,6 +9,7 @@ def create_spark_session(app_name: str = "Spark ETL Pipeline") -> SparkSession:
         SparkSession.builder
         .appName(app_name)
         .master("local[*]")
+        .config("spark.sql.shuffle.partitions", "8")
         .getOrCreate()
     )
 
