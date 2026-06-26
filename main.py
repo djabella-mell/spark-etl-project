@@ -1,5 +1,11 @@
+from src.utils import create_spark_session
+
+
 def main():
-    print("Spark ETL Pipeline")
+    spark = create_spark_session()
+    print("Spark session created successfully")
+    print(f"Spark version: {spark.version}")
+    spark.stop()
 
 
 if __name__ == "__main__":
