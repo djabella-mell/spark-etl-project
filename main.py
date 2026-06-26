@@ -28,7 +28,8 @@ def main():
     links_clean = clean_links(links_df)
 
     movies_broadcast = broadcast_movies(movies_clean)
-
+    ratings_clean.cache()
+    movies_clean.cache()
     validate_dataframe(movies_clean, "movies_silver")
     validate_dataframe(ratings_clean, "ratings_silver")
     validate_dataframe(tags_clean, "tags_silver")
@@ -71,6 +72,8 @@ def main():
     top_by_genre.show(50, truncate=False)
 
     write_gold(top_by_genre, "data/gold/top_movies_by_genre")
+    ratings_clean.unpersist()
+    movies_clean.unpersist()
 
     spark.stop()
 
